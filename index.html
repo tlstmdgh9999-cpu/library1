@@ -6,57 +6,61 @@
     <title>우리교회 작은 도서관</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f9f9f9; }
-        h2 { text-align: center; color: #333; }
-        #searchBar { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        .book-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f9f9f9; }
+        h2 { text-align: center; color: #333; margin-top: 30px; }
+        #searchBar { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid #007bff; border-radius: 10px; font-size: 16px; box-sizing: border-box; outline: none; }
+        .book-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid #007bff; }
         .book-title { font-weight: bold; font-size: 1.1em; color: #333; }
+        #infoText { margin-bottom: 10px; font-size: 0.9em; color: #666; text-align: right; }
     </style>
 </head>
 <body>
 
-    <h2>📚 도서 검색 (제목)</h2>
-    <input type="text" id="searchBar" placeholder="검색하고 싶은 책 제목을 입력하세요..." onkeyup="searchBooks()">
-    <div id="resultList">데이터를 불러오는 중...</div>
+    <h2>📚 도서 목록 검색</h2>
+    <input type="text" id="searchBar" placeholder="찾으시는 책 제목을 입력하세요..." onkeyup="searchBooks()">
+    <div id="infoText">목록을 불러오는 중...</div>
+    <div id="resultList"></div>
 
     <script>
-        let bookData = [];
+        let bookTitles = [];
 
-        // CSV 파일 불러오기
+        // CSV 파일 읽기 (가장 안전한 방식)
         Papa.parse("book_list.csv", {
             download: true,
-            header: true, // 첫 줄을 '도서명'으로 인식합니다
+            header: false, // 제목 줄 유무와 상관없이 첫 칸을 가져오기 위해 false 설정
             complete: function(results) {
-                bookData = results.data;
-                displayBooks(bookData);
+                // 첫 번째 열(index 0)의 데이터만 추출하고, 빈 줄이나 '도서명' 제목줄은 제외
+                bookTitles = results.data
+                    .map(row => row[0] ? row[0].trim() : "")
+                    .filter(title => title !== "" && title !== "도서명");
+                
+                document.getElementById('infoText').innerText = `총 ${bookTitles.length}권의 책이 있습니다.`;
+                displayBooks(bookTitles);
             }
         });
 
-        function displayBooks(books) {
-            const list = document.getElementById('resultList');
-            list.innerHTML = '';
+        function displayBooks(list) {
+            const container = document.getElementById('resultList');
+            container.innerHTML = '';
             
-            // 실제 내용이 있는 데이터만 걸러내서 보여줍니다
-            const validBooks = books.filter(b => b.도서명 && b.도서명.trim() !== "");
-            
-            if (validBooks.length === 0) {
-                list.innerHTML = "검색 결과가 없습니다.";
+            if (list.length === 0) {
+                container.innerHTML = "<p style='text-align:center; color:#999;'>검색 결과가 없습니다.</p>";
                 return;
             }
 
-            validBooks.forEach(book => {
-                list.innerHTML += `
+            list.forEach(title => {
+                container.innerHTML += `
                     <div class="book-item">
-                        <div class="book-title">${book.도서명}</div>
+                        <div class="book-title">${title}</div>
                     </div>
                 `;
             });
         }
 
         function searchBooks() {
-            const query = document.getElementById('searchBar').value.toLowerCase();
-            const filtered = bookData.filter(book => 
-                book.도서명 && book.도서명.toLowerCase().includes(query)
+            const query = document.getElementById('searchBar').value.toLowerCase().trim();
+            const filtered = bookTitles.filter(title => 
+                title.toLowerCase().includes(query)
             );
             displayBooks(filtered);
         }
