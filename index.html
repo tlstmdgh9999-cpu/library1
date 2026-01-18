@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리교회 작은 도서관</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f9f9f9; }
+        h2 { text-align: center; color: #333; }
+        #searchBar { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .book-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .book-title { font-weight: bold; font-size: 1.1em; color: #333; }
+    </style>
+</head>
+<body>
+
+    <h2>📚 도서 검색 (제목)</h2>
+    <input type="text" id="searchBar" placeholder="검색하고 싶은 책 제목을 입력하세요..." onkeyup="searchBooks()">
+    <div id="resultList">데이터를 불러오는 중...</div>
+
+    <script>
+        let bookData = [];
+
+        // CSV 파일 불러오기
+        Papa.parse("book_list.csv", {
+            download: true,
+            header: true, // 첫 줄을 '도서명'으로 인식합니다
+            complete: function(results) {
+                bookData = results.data;
+                displayBooks(bookData);
+            }
+        });
+
+        function displayBooks(books) {
+            const list = document.getElementById('resultList');
+            list.innerHTML = '';
+            
+            // 실제 내용이 있는 데이터만 걸러내서 보여줍니다
+            const validBooks = books.filter(b => b.도서명 && b.도서명.trim() !== "");
+            
+            if (validBooks.length === 0) {
+                list.innerHTML = "검색 결과가 없습니다.";
+                return;
+            }
+
+            validBooks.forEach(book => {
+                list.innerHTML += `
+                    <div class="book-item">
+                        <div class="book-title">${book.도서명}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function searchBooks() {
+            const query = document.getElementById('searchBar').value.toLowerCase();
+            const filtered = bookData.filter(book => 
+                book.도서명 && book.도서명.toLowerCase().includes(query)
+            );
+            displayBooks(filtered);
+        }
+    </script>
+</body>
+</html>
