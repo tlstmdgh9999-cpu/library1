@@ -25,7 +25,7 @@
         let bookTitles = [];
 
         // CSV 파일 읽기 (가장 안전한 방식)
-        Papa.parse("book_list.csv", {
+        Papa.parse("book_list1.csv", {
             download: true,
             header: false, // 제목 줄 유무와 상관없이 첫 칸을 가져오기 위해 false 설정
             complete: function(results) {
@@ -67,3 +67,4 @@
     </script>
 </body>
 </html>
+
