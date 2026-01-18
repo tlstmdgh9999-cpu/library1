@@ -8651,40 +8651,27 @@ why? 교과서 사회(어린이만화 61)
 사이언스툰과학자들3
 사이언스툰과학자들4
 사이언스툰과학자들5`;
-        
-        // --------------------------------------------------
-        // 줄바꿈 기준으로 나누고 빈 줄은 제거합니다.
-        const bookTitles = rawData.split('\n')
-            .map(t => t.trim())
-            .filter(t => t !== "" && t !== "도서명");
 
-        document.getElementById('infoText').innerText = `총 ${bookTitles.length}권의 책이 있습니다.`;
+// 아래는 절대 건드리지 마세요!
+const bookTitles = rawData.split('\n').map(t => t.trim()).filter(t => t !== "");
+document.getElementById('infoText').innerText = `총 ${bookTitles.length.toLocaleString()}권의 책이 있습니다.`;
 
-        function displayBooks(list) {
-            const container = document.getElementById('resultList');
-            container.innerHTML = '';
-            if (list.length === 0) {
-                container.innerHTML = "<p style='text-align:center; color:#999;'>검색 결과가 없습니다.</p>";
-                return;
-            }
-            list.forEach(title => {
-                container.innerHTML += `<div class="book-item"><div class="book-title">${title}</div></div>`;
-            });
-        }
+function displayBooks(list) {
+    const container = document.getElementById('resultList');
+    container.innerHTML = '';
+    const limit = list.length > 100 ? 100 : list.length;
+    for(let i=0; i < limit; i++) {
+        container.innerHTML += `<div class="book-item"><div class="book-title">${list[i]}</div></div>`;
+    }
+}
 
-        function searchBooks() {
-            const query = document.getElementById('searchBar').value.toLowerCase().trim();
-            const filtered = bookTitles.filter(title => title.toLowerCase().includes(query));
-            displayBooks(filtered);
-        }
-
-        // 처음 시작할 때 전체 목록 표시
-        displayBooks(bookTitles);
-    </script>
+function searchBooks() {
+    const query = document.getElementById('searchBar').value.toLowerCase().trim();
+    if (query === "") { displayBooks(bookTitles); return; }
+    const filtered = bookTitles.filter(title => title.toLowerCase().includes(query));
+    displayBooks(filtered);
+}
+displayBooks(bookTitles);
+</script>
 </body>
 </html>
-
-
-
-
-
